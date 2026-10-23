@@ -132,8 +132,36 @@ services:
       - KIBANA_PASSWORD=${KIBANA_PASSWORD}
     command: /setup/kibana-password.sh
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    depends_on:
+      kibana-password:
+        condition: service_completed_successfully
+    volumes:
+      - certs:/usr/share/kibana/config/certs
+      - kibanadata:/usr/share/kibana/data
+    ports:
+      - "5601:5601"
+    environment:
+      - SERVERNAME=kibana
+      - SERVER_PUBLICBASEURL=http://10.11.10.230:5601
+      - ELASTICSEARCH_HOSTS=https://es01:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_SECURITY_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+      - XPACK_REPORTING_ENCRYPTIONKEY=${ENCRYPTION_KEY}
+    mem_limit: 1536m
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
 volumes:
   certs:
   esdata01:
   esdata02:
   esdata03:
+  kibanadata:
