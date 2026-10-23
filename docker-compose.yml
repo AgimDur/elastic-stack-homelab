@@ -2,27 +2,19 @@
 name: elastic-lab
 
 services:
-  setup:
+  certs:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     user: "0"
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - ./setup:/setup:ro
-    environment:
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
-    command: /setup/setup.sh
-    healthcheck:
-      test: ["CMD-SHELL", "[ -f config/certs/es01/es01.crt ]"]
-      interval: 2s
-      timeout: 5s
-      retries: 120
+    command: /setup/certs.sh
 
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     depends_on:
-      setup:
-        condition: service_healthy
+      certs:
+        condition: service_completed_successfully
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata01:/usr/share/elasticsearch/data
@@ -59,8 +51,8 @@ services:
   es02:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     depends_on:
-      setup:
-        condition: service_healthy
+      certs:
+        condition: service_completed_successfully
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata02:/usr/share/elasticsearch/data
@@ -94,8 +86,8 @@ services:
   es03:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     depends_on:
-      setup:
-        condition: service_healthy
+      certs:
+        condition: service_completed_successfully
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata03:/usr/share/elasticsearch/data
@@ -126,6 +118,19 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
+
+  kibana-password:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    depends_on:
+      es01:
+        condition: service_healthy
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+      - ./setup:/setup:ro
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+    command: /setup/kibana-password.sh
 
 volumes:
   certs:
