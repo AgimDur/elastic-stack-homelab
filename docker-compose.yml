@@ -8,6 +8,7 @@ services:
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - ./setup:/setup:ro
+      - snapshots:/snapshots
     command: /setup/certs.sh
 
   es01:
@@ -18,11 +19,13 @@ services:
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata01:/usr/share/elasticsearch/data
+      - snapshots:/usr/share/elasticsearch/snapshots
     ports:
       - "9200:9200"
     environment:
       - node.name=es01
       - cluster.name=${CLUSTER_NAME}
+      - path.repo=/usr/share/elasticsearch/snapshots
       - node.roles=master,data_hot,data_content,ingest
       - cluster.initial_master_nodes=es01,es02,es03
       - discovery.seed_hosts=es02,es03
@@ -56,9 +59,11 @@ services:
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata02:/usr/share/elasticsearch/data
+      - snapshots:/usr/share/elasticsearch/snapshots
     environment:
       - node.name=es02
       - cluster.name=${CLUSTER_NAME}
+      - path.repo=/usr/share/elasticsearch/snapshots
       - node.roles=master,data_hot,data_content,ingest
       - cluster.initial_master_nodes=es01,es02,es03
       - discovery.seed_hosts=es01,es03
@@ -91,9 +96,11 @@ services:
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
       - esdata03:/usr/share/elasticsearch/data
+      - snapshots:/usr/share/elasticsearch/snapshots
     environment:
       - node.name=es03
       - cluster.name=${CLUSTER_NAME}
+      - path.repo=/usr/share/elasticsearch/snapshots
       - node.roles=master,data_frozen
       - xpack.searchable.snapshot.shared_cache.size=5gb
       - cluster.initial_master_nodes=es01,es02,es03
@@ -165,3 +172,4 @@ volumes:
   esdata02:
   esdata03:
   kibanadata:
+  snapshots:

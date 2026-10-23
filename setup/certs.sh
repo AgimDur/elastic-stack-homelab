@@ -20,4 +20,5 @@ fi
 chown -R root:root config/certs
 find config/certs -type d -exec chmod 750 {} \;
 find config/certs -type f -exec chmod 640 {} \;
+chown 1000:0 /snapshots; chmod 770 /snapshots
 echo "Zertifikate bereit"
