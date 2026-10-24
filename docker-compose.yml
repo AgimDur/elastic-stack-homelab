@@ -24,6 +24,7 @@ services:
       - "9200:9200"
     environment:
       - node.name=es01
+      - indices.lifecycle.poll_interval=1m
       - cluster.name=${CLUSTER_NAME}
       - path.repo=/usr/share/elasticsearch/snapshots
       - node.roles=master,data_hot,data_content,ingest
