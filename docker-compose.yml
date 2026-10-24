@@ -188,6 +188,21 @@ services:
       - FLEET_CA=/certs/ca/ca.crt
     mem_limit: 1g
 
+  elastic-agent:
+    image: docker.elastic.co/elastic-agent/elastic-agent:${STACK_VERSION}
+    hostname: elastic-agent
+    depends_on:
+      fleet-server:
+        condition: service_started
+    volumes:
+      - certs:/certs:ro
+    environment:
+      - FLEET_ENROLL=1
+      - FLEET_URL=https://fleet-server:8220
+      - FLEET_ENROLLMENT_TOKEN=${FLEET_ENROLLMENT_TOKEN}
+      - FLEET_CA=/certs/ca/ca.crt
+    mem_limit: 1g
+
 volumes:
   certs:
   esdata01:
